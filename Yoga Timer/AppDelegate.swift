@@ -3,6 +3,7 @@ import AVFoundation
 import HealthKit
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
+
     var window: UIWindow?
 
     func application(_ application: UIApplication,
@@ -15,36 +16,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     private func configureAudioSession() {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            NotificationCenter.default.addObserver(self, selector: #selector(handleAudioInterruption),
-                                                   name: AVAudioSession.interruptionNotification, object: nil)
-
-            try audioSession.setCategory(.playback, mode: .default, options: [
-                .mixWithOthers,
-                .allowAirPlay,
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .duckOthers
-            ])
-            try audioSession.setActive(true, options: [])
+            try audioSession.setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowAirPlay])
+            try audioSession.setActive(true)
             print("Audio session configured successfully.")
         } catch {
             print("Failed to set up audio session: \(error.localizedDescription)")
-        }
-    }
-
-    @objc private func handleAudioInterruption(notification: Notification) {
-        guard let info = notification.userInfo,
-              let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
-              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
-
-        if type == .began {
-            print("Audio session interrupted.")
-        } else if type == .ended {
-            do {
-                try AVAudioSession.sharedInstance().setActive(true)
-            } catch {
-                print("Failed to reactivate audio session: \(error.localizedDescription)")
-            }
         }
     }
 
